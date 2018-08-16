@@ -1,6 +1,6 @@
 [package]
 name = "ncmc"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["阿卡琳 <hufan.akarin@Gmail.com>"]
 
 [dependencies]
@@ -13,3 +13,6 @@ serde_json = "1.0.26"
 glob = "0.2.11"
 metaflac = "0.1.8"
 id3 = "0.2.4"
+
+[profile.release]
+lto = true
