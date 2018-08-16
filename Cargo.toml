@@ -3,6 +3,17 @@ name = "ncmc"
 version = "0.1.1"
 authors = ["阿卡琳 <hufan.akarin@Gmail.com>"]
 
+description = "convert encrypted ncm file to original music file."
+homepage = "https://github.com/hufan-akari/ncmc"
+repository = "https://github.com/hufan-akari/ncmc"
+license = "MIT"
+readme = "README.md"
+keywords = ["ncm", "converter", "ncmdump"]
+
+[badges]
+travis-ci = { repository = "hufan-akari/ncmc" }
+appveyor = { repository = "hufan-akari/ncmc" }
+
 [dependencies]
 aes = "0.2.0"
 block-modes = "0.1.0"
