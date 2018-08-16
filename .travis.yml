@@ -1,4 +1,4 @@
-dist: ncmc
+dist: trusty
 language: rust
 services: docker
 sudo: required
@@ -22,9 +22,6 @@ matrix:
     - env: TARGET=x86_64-apple-darwin
       os: osx
 
-      # Windows
-    - env: TARGET=x86_64-pc-windows-gnu
-
     # Testing other channels
     - env: TARGET=x86_64-unknown-linux-gnu
       rust: nightly
@@ -37,6 +34,7 @@ before_install:
   - rustup self update
 
 install:
+  - sh ci/install.sh
   - source ~/.cargo/env || true
 
 script:
