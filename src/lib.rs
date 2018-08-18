@@ -64,6 +64,15 @@ struct MusicMeta {
     format: String,
 }
 
+#[inline]
+fn get_u32(buffer: &[u8]) -> u32 {
+    assert!(buffer.len() >= 4);
+    u32::from(buffer[0])
+        | u32::from(buffer[1]) << 8
+        | u32::from(buffer[2]) << 16
+        | u32::from(buffer[3]) << 24
+}
+
 pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
     let mut input = io::BufReader::new(File::open(&file_path)?);
     let mut buffer = [0; BUFFER_SIZE];
@@ -78,10 +87,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
     input.read_exact(&mut buffer[0..4])?;
 
-    let key_len = u32::from(buffer[0])
-        | u32::from(buffer[1]) << 8
-        | u32::from(buffer[2]) << 16
-        | u32::from(buffer[3]) << 24;
+    let key_len = get_u32(&buffer[..4]);
 
     let mut key_data = vec![0; key_len as usize];
 
@@ -108,12 +114,16 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
         key_box.swap(i, j);
     }
 
+    let mut new_key_box = [0u8; 256];
+
+    for (i, item) in new_key_box.iter_mut().enumerate() {
+        *item = key_box
+            [(key_box[i] as usize + key_box[(((key_box[i]) as usize) + i) & 0xff] as usize) & 0xff];
+    }
+
     input.read_exact(&mut buffer[0..4])?;
 
-    let meta_data_len = u32::from(buffer[0])
-        | u32::from(buffer[1]) << 8
-        | u32::from(buffer[2]) << 16
-        | u32::from(buffer[3]) << 24;
+    let meta_data_len = get_u32(&buffer[..4]);
 
     let mut meta_data = vec![0; meta_data_len as usize];
 
@@ -154,10 +164,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
     input.read_exact(&mut buffer[0..4])?;
 
-    let image_size = u32::from(buffer[0])
-        | u32::from(buffer[1]) << 8
-        | u32::from(buffer[2]) << 16
-        | u32::from(buffer[3]) << 24;
+    let image_size = get_u32(&buffer[..4]);
 
     let mut image = vec![0; image_size as usize];
     input.read_exact(&mut image)?;
@@ -185,9 +192,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
             }
             for (i, item) in buffer.iter_mut().enumerate().take(read_size) {
                 let j = (i + 1) & 0xff;
-                *item ^= key_box[(key_box[j] as usize
-                                     + key_box[(((key_box[j]) as usize) + j) & 0xff] as usize)
-                                     & 0xff];
+                *item ^= new_key_box[j];
             }
 
             output.write_all(&buffer)?;

@@ -1,6 +1,6 @@
 [package]
 name = "ncmc"
-version = "0.1.1"
+version = "0.1.2"
 authors = ["阿卡琳 <hufan.akarin@Gmail.com>"]
 
 description = "convert encrypted ncm file to original music file."
@@ -26,4 +26,5 @@ metaflac = "0.1.8"
 id3 = "0.2.4"
 
 [profile.release]
+panic = "abort"
 lto = true

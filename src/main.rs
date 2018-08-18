@@ -34,10 +34,7 @@ fn main() -> Result<(), Box<error::Error>> {
                     .collect::<Vec<_>>()
             }
         }
-        _ => args[1..]
-            .into_iter()
-            .map(|arg| PathBuf::from(arg))
-            .collect::<Vec<_>>(),
+        _ => args[1..].into_iter().map(PathBuf::from).collect::<Vec<_>>(),
     };
 
     println!("total: {}", file_list.len());
