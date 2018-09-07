@@ -1,8 +1,8 @@
-# ncmc &middot; [![Build Status](https://travis-ci.org/hufan-akari/ncmc.svg?branch=master)](https://travis-ci.org/hufan-akari/ncmc) [![Build status](https://ci.appveyor.com/api/projects/status/sfo0e6dr9tga6tjr?svg=true)](https://ci.appveyor.com/project/hufan-akari/ncmc)
+# ncmc &middot; [![Build Status](https://travis-ci.org/magic-akari/ncmc.svg?branch=master)](https://travis-ci.org/magic-akari/ncmc) [![Build status](https://ci.appveyor.com/api/projects/status/qj0uc19p1oxuxn0v?svg=true)](https://ci.appveyor.com/project/magic-akari/ncmc)
 
 ## How do I get it?
 
-install from cargo or download from [GitHub Release](https://github.com/hufan-akari/ncmc/releases)
+install from cargo or download from [GitHub Release](https://github.com/magic-akari/ncmc/releases)
 
 Install
 
