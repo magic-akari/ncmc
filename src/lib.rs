@@ -4,16 +4,17 @@ extern crate block_modes;
 extern crate glob;
 extern crate id3;
 extern crate metaflac;
-extern crate serde;
-extern crate serde_json;
 
 #[macro_use]
-extern crate serde_derive;
+extern crate miniserde;
+
+use miniserde::json;
 
 use std::error;
 use std::fmt;
 use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
+use std::str;
 use std::{io, io::prelude::*};
 
 use aes::Aes128;
@@ -54,10 +55,11 @@ impl<'a> error::Error for SimpleError<'a> {
     }
 }
 
-#[derive(Debug, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[derive(Debug, MiniDeserialize)]
 struct MusicMeta {
+    #[serde(rename = "musicId")]
     music_id: u32,
+    #[serde(rename = "musicName")]
     music_name: String,
     artist: Vec<(String, u32)>,
     album: String,
@@ -143,7 +145,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
     // meta_data_decoded == "music:" + json string
 
-    let music_meta: MusicMeta = serde_json::from_slice(&meta_data_decoded[6..])?;
+    let music_meta: MusicMeta = json::from_str(str::from_utf8(&meta_data_decoded[6..])?)?;
 
     println!("{:>10}\t{}", "musicId", music_meta.music_id);
     println!("{:>10}\t{}", "musicName", music_meta.music_name);

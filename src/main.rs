@@ -4,8 +4,6 @@ extern crate block_modes;
 extern crate glob;
 extern crate id3;
 extern crate metaflac;
-extern crate serde;
-extern crate serde_json;
 
 extern crate ncmc;
 
