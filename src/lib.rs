@@ -103,6 +103,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
     let cipher = Aes128Ecb::new_varkey(&CORE_KEY).unwrap();
 
+    // "neteasecloudmusic" + de_key_data
     let de_key_data = &cipher.decrypt_pad(&mut key_data).unwrap()[17..];
 
     let key_len = de_key_data.len();
@@ -154,10 +155,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
     // input.read_exact(&mut buffer[0..4])?;
 
-    // let crc32 = buffer[0] as u32
-    //     | (buffer[1] as u32) << 8
-    //     | (buffer[2] as u32) << 16
-    //     | (buffer[3] as u32) << 24;
+    // let crc32 = get_u32(&buffer[..4]);
 
     // println!("crc32 = {:?}", crc32);
 
@@ -169,13 +167,20 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
     let image_size = get_u32(&buffer[..4]);
 
     let mut image = vec![0; image_size as usize];
-    input.read_exact(&mut image)?;
 
-    let image_mime_type = match &image[..8] {
-        [137, 80, 78, 71, 13, 10, 26, 10] => "image/png",
-        [0xFF, 0xD8, 0xFF, 0xE0, _, _, _, _] => "image/jpeg",
-        [71, 73, 70, _, _, _, _, _] => "image/gif",
-        _ => "image/*",
+    let image_mime_type = if image_size >= 8 {
+        input.read_exact(&mut image)?;
+
+        match &image[..8] {
+            [137, 80, 78, 71, 13, 10, 26, 10] => "image/png",
+            [0xFF, 0xD8, 0xFF, 0xE0, _, _, _, _] => "image/jpeg",
+            [71, 73, 70, _, _, _, _, _] => "image/gif",
+            _ => "image/*",
+        }
+    } else {
+        input.seek(io::SeekFrom::Start(8367))?;
+
+        ""
     };
 
     let mut target_path = file_path;
@@ -205,7 +210,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
         "flac" => {
             let mut tag = metaflac::Tag::read_from_path(&target_path)?;
             {
-                let mut vorbis_comment = tag.vorbis_comments_mut();
+                let vorbis_comment = tag.vorbis_comments_mut();
                 vorbis_comment.set_title(vec![music_meta.music_name]);
                 vorbis_comment.set_album(vec![music_meta.album]);
                 vorbis_comment.set_artist(
@@ -216,12 +221,13 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
                         .collect::<Vec<_>>(),
                 );
             }
-
-            tag.add_picture(
-                image_mime_type,
-                metaflac::block::PictureType::CoverFront,
-                image,
-            );
+            if image_size >= 8 {
+                tag.add_picture(
+                    image_mime_type,
+                    metaflac::block::PictureType::CoverFront,
+                    image,
+                );
+            }
             tag.save()?;
         }
         "mp3" => {
@@ -242,13 +248,14 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
             //     description: "".to_string(),
             //     text: String::from_utf8(meta_data)?,
             // });
-
-            tag.add_picture(id3::frame::Picture {
-                mime_type: image_mime_type.to_string(),
-                picture_type: id3::frame::PictureType::CoverFront,
-                description: "Cover".to_string(),
-                data: image,
-            });
+            if image_size >= 8 {
+                tag.add_picture(id3::frame::Picture {
+                    mime_type: image_mime_type.to_string(),
+                    picture_type: id3::frame::PictureType::CoverFront,
+                    description: "Cover".to_string(),
+                    data: image,
+                });
+            }
             tag.write_to_path(&target_path, id3::Version::Id3v24)?;
         }
         _ => unimplemented!(),

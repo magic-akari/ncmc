@@ -1,7 +1,8 @@
 [package]
 name = "ncmc"
-version = "0.1.4"
+version = "0.1.5"
 authors = ["阿卡琳 <hufan.akarin@Gmail.com>"]
+edition = "2018"
 
 description = "convert encrypted ncm file to original music file."
 homepage = "https://github.com/magic-akari/ncmc"
@@ -15,13 +16,13 @@ travis-ci = { repository = "magic-akari/ncmc" }
 appveyor = { repository = "magic-akari/ncmc" }
 
 [dependencies]
-aes = "0.2.0"
-block-modes = "0.1.0"
-base64 = "0.9.2"
+aes = "0.3.2"
+block-modes = "0.2.0"
+base64 = "0.10.0"
 glob = "0.2.11"
 metaflac = "0.1.8"
 id3 = "0.2.5"
-miniserde = "0.1.1"
+miniserde = "0.1.9"
 
 [profile.release]
 panic = "abort"
