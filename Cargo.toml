@@ -1,6 +1,6 @@
 [package]
 name = "ncmc"
-version = "0.1.5"
+version = "0.1.6"
 authors = ["阿卡琳 <hufan.akarin@Gmail.com>"]
 edition = "2018"
 

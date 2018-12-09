@@ -63,6 +63,8 @@ struct MusicMeta {
     music_name: String,
     artist: Vec<(String, u32)>,
     album: String,
+    #[serde(rename = "albumPic")]
+    album_pic: String,
     format: String,
 }
 
@@ -202,7 +204,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
                 *item ^= new_key_box[j];
             }
 
-            output.write_all(&buffer)?;
+            output.write_all(&buffer[..read_size])?;
         }
     }
 
