@@ -1,10 +1,3 @@
-extern crate aes;
-extern crate base64;
-extern crate block_modes;
-extern crate glob;
-extern crate id3;
-extern crate metaflac;
-
 #[macro_use]
 extern crate miniserde;
 
@@ -103,10 +96,10 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
     type Aes128Ecb = Ecb<Aes128, Pkcs7>;
 
-    let cipher = Aes128Ecb::new_varkey(&CORE_KEY).unwrap();
+    let cipher = Aes128Ecb::new_var(&CORE_KEY, Default::default()).unwrap();
 
     // "neteasecloudmusic" + de_key_data
-    let de_key_data = &cipher.decrypt_pad(&mut key_data).unwrap()[17..];
+    let de_key_data = &cipher.decrypt(&mut key_data).unwrap()[17..];
 
     let key_len = de_key_data.len();
 
@@ -130,30 +123,38 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
     let meta_data_len = get_u32(&buffer[..4]);
 
-    let mut meta_data = vec![0; meta_data_len as usize];
+    let music_meta: Option<MusicMeta> = if meta_data_len == 0 {
+        println!("{:>10}\tmetadata missing", "warning:");
 
-    input.read_exact(&mut meta_data)?;
+        None
+    } else {
+        let mut meta_data = vec![0; meta_data_len as usize];
 
-    for data in &mut meta_data {
-        *data ^= 0x63;
-    }
+        input.read_exact(&mut meta_data)?;
 
-    // meta_data == "163 key(Don't modify):" + base64 string
+        for data in &mut meta_data {
+            *data ^= 0x63;
+        }
 
-    let cipher = Aes128Ecb::new_varkey(&META_KEY).unwrap();
+        // meta_data == "163 key(Don't modify):" + base64 string
 
-    let mut bytes = decode(&meta_data[22..]).unwrap();
+        let cipher = Aes128Ecb::new_var(&META_KEY, Default::default()).unwrap();
 
-    let meta_data_decoded = cipher.decrypt_pad(&mut bytes).unwrap();
+        let mut bytes = decode(&meta_data[22..]).unwrap();
 
-    // meta_data_decoded == "music:" + json string
+        let meta_data_decoded = cipher.decrypt(&mut bytes).unwrap();
 
-    let music_meta: MusicMeta = json::from_str(str::from_utf8(&meta_data_decoded[6..])?)?;
+        // meta_data_decoded == "music:" + json string
 
-    println!("{:>10}\t{}", "musicId", music_meta.music_id);
-    println!("{:>10}\t{}", "musicName", music_meta.music_name);
-    println!("{:>10}\t{}", "album", music_meta.album);
-    println!("{:>10}\t{}", "format", music_meta.format);
+        let music_meta: MusicMeta = json::from_str(str::from_utf8(&meta_data_decoded[6..])?)?;
+
+        println!("{:>10}\t{}", "musicId", music_meta.music_id);
+        println!("{:>10}\t{}", "musicName", music_meta.music_name);
+        println!("{:>10}\t{}", "album", music_meta.album);
+        println!("{:>10}\t{}", "format", music_meta.format);
+
+        Some(music_meta)
+    };
 
     // input.read_exact(&mut buffer[0..4])?;
 
@@ -180,13 +181,29 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
             _ => "image/*",
         }
     } else {
-        input.seek(io::SeekFrom::Start(8367))?;
+        if music_meta.is_some() {
+            input.seek(io::SeekFrom::Start(8367))?;
+        }
 
         ""
     };
 
     let mut target_path = file_path;
-    target_path.set_extension(&music_meta.format);
+    {
+        input.read_exact(&mut buffer[0..4])?;
+
+        for (i, item) in buffer.iter_mut().enumerate().take(4) {
+            let j = (i + 1) & 0xff;
+            *item ^= new_key_box[j];
+        }
+
+        if buffer[..4] == [0x66, 0x4c, 0x61, 0x43] {
+            target_path.set_extension("flac");
+        } else {
+            target_path.set_extension("mp3");
+        }
+        input.seek(io::SeekFrom::Current(-4))?;
+    }
 
     {
         let mut output = OpenOptions::new()
@@ -208,59 +225,62 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
         }
     }
 
-    match &music_meta.format[..] {
-        "flac" => {
-            let mut tag = metaflac::Tag::read_from_path(&target_path)?;
-            {
-                let vorbis_comment = tag.vorbis_comments_mut();
-                vorbis_comment.set_title(vec![music_meta.music_name]);
-                vorbis_comment.set_album(vec![music_meta.album]);
-                vorbis_comment.set_artist(
+    if let Some(music_meta) = music_meta {
+        match &music_meta.format[..] {
+            "flac" => {
+                let mut tag = metaflac::Tag::read_from_path(&target_path)?;
+                {
+                    let vorbis_comment = tag.vorbis_comments_mut();
+                    vorbis_comment.set_title(vec![music_meta.music_name]);
+                    vorbis_comment.set_album(vec![music_meta.album]);
+                    vorbis_comment.set_artist(
+                        music_meta
+                            .artist
+                            .into_iter()
+                            .map(|ar| ar.0)
+                            .collect::<Vec<_>>(),
+                    );
+                }
+                if image_size >= 8 {
+                    tag.add_picture(
+                        image_mime_type,
+                        metaflac::block::PictureType::CoverFront,
+                        image,
+                    );
+                }
+
+                tag.save()?;
+            }
+            "mp3" => {
+                let mut tag = id3::Tag::read_from_path(&target_path)?;
+                tag.set_title(music_meta.music_name);
+                tag.set_album(music_meta.album);
+                tag.set_artist(
                     music_meta
                         .artist
                         .into_iter()
                         .map(|ar| ar.0)
-                        .collect::<Vec<_>>(),
+                        .collect::<Vec<_>>()
+                        .join("/"),
                 );
-            }
-            if image_size >= 8 {
-                tag.add_picture(
-                    image_mime_type,
-                    metaflac::block::PictureType::CoverFront,
-                    image,
-                );
-            }
-            tag.save()?;
-        }
-        "mp3" => {
-            let mut tag = id3::Tag::read_from_path(&target_path)?;
-            tag.set_title(music_meta.music_name);
-            tag.set_album(music_meta.album);
-            tag.set_artist(
-                music_meta
-                    .artist
-                    .into_iter()
-                    .map(|ar| ar.0)
-                    .collect::<Vec<_>>()
-                    .join("/"),
-            );
 
-            // tag.add_comment(id3::frame::Comment {
-            //     lang: "XXX".to_string(),
-            //     description: "".to_string(),
-            //     text: String::from_utf8(meta_data)?,
-            // });
-            if image_size >= 8 {
-                tag.add_picture(id3::frame::Picture {
-                    mime_type: image_mime_type.to_string(),
-                    picture_type: id3::frame::PictureType::CoverFront,
-                    description: "Cover".to_string(),
-                    data: image,
-                });
+                // tag.add_comment(id3::frame::Comment {
+                //     lang: "XXX".to_string(),
+                //     description: "".to_string(),
+                //     text: String::from_utf8(meta_data)?,
+                // });
+                if image_size >= 8 {
+                    tag.add_picture(id3::frame::Picture {
+                        mime_type: image_mime_type.to_string(),
+                        picture_type: id3::frame::PictureType::CoverFront,
+                        description: "Cover".to_string(),
+                        data: image,
+                    });
+                }
+                tag.write_to_path(&target_path, id3::Version::Id3v24)?;
             }
-            tag.write_to_path(&target_path, id3::Version::Id3v24)?;
+            _ => unimplemented!(),
         }
-        _ => unimplemented!(),
     }
 
     Ok(target_path)

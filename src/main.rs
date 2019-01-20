@@ -1,12 +1,3 @@
-extern crate aes;
-extern crate base64;
-extern crate block_modes;
-extern crate glob;
-extern crate id3;
-extern crate metaflac;
-
-extern crate ncmc;
-
 use glob::glob;
 use std::env;
 use std::error;
@@ -26,13 +17,13 @@ fn main() -> Result<(), Box<error::Error>> {
             if metadata(arg)?.is_file() {
                 [PathBuf::from(arg)].to_vec()
             } else {
-                let path = [arg, "**", "*.ncm"].into_iter().collect::<PathBuf>();
+                let path = [arg, "**", "*.ncm"].iter().collect::<PathBuf>();
                 glob(path.to_str().unwrap())?
                     .filter_map(Result::ok)
                     .collect::<Vec<_>>()
             }
         }
-        _ => args[1..].into_iter().map(PathBuf::from).collect::<Vec<_>>(),
+        _ => args[1..].iter().map(PathBuf::from).collect::<Vec<_>>(),
     };
 
     println!("total: {}", file_list.len());
