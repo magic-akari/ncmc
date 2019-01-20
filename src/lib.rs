@@ -8,7 +8,11 @@ use std::fmt;
 use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
 use std::str;
-use std::{io, io::prelude::*};
+use std::{
+    io,
+    io::prelude::{Read, Seek, Write},
+    io::SeekFrom::{Current, Start},
+};
 
 use aes::Aes128;
 use base64::decode;
@@ -28,6 +32,8 @@ const META_KEY: [u8; 16] = [
 ];
 
 const BUFFER_SIZE: usize = 0x8000;
+
+const DESCRIPTION: &str = "converted by ncmc(https://github.com/magic-akari/ncmc).";
 
 #[derive(Debug)]
 struct SimpleError<'a>(&'a str);
@@ -80,131 +86,157 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
     }
 
     // input.seek_relative(2);
-    input.seek(io::SeekFrom::Current(2))?;
-
-    input.read_exact(&mut buffer[0..4])?;
-
-    let key_len = get_u32(&buffer[..4]);
-
-    let mut key_data = vec![0; key_len as usize];
-
-    input.read_exact(&mut key_data)?;
-
-    for data in &mut key_data {
-        *data ^= 0x64;
-    }
+    input.seek(Current(2))?;
 
     type Aes128Ecb = Ecb<Aes128, Pkcs7>;
 
-    let cipher = Aes128Ecb::new_var(&CORE_KEY, Default::default()).unwrap();
+    let key_data = {
+        let mut key_data = {
+            input.read_exact(&mut buffer[0..4])?;
+            let key_len = get_u32(&buffer[..4]);
 
-    // "neteasecloudmusic" + de_key_data
-    let de_key_data = &cipher.decrypt(&mut key_data).unwrap()[17..];
+            let mut key_data = vec![0; key_len as usize];
 
-    let key_len = de_key_data.len();
+            input.read_exact(&mut key_data)?;
 
-    let mut key_box = (0u8..=255).collect::<Vec<_>>();
+            for data in &mut key_data {
+                *data ^= 0x64;
+            }
 
-    let mut j: usize = 0;
+            key_data
+        };
 
-    for i in 0..256 {
-        j = (key_box[i] as usize + j + de_key_data[i % key_len] as usize) & 0xff;
-        key_box.swap(i, j);
-    }
+        let cipher = Aes128Ecb::new_var(&CORE_KEY, Default::default()).unwrap();
 
-    let mut new_key_box = [0u8; 256];
+        // "neteasecloudmusic" + de_key_data
+        let key_data = &cipher.decrypt(&mut key_data).unwrap()[17..];
 
-    for (i, item) in new_key_box.iter_mut().enumerate() {
-        *item = key_box
-            [(key_box[i] as usize + key_box[(((key_box[i]) as usize) + i) & 0xff] as usize) & 0xff];
-    }
+        let key_len = key_data.len();
 
-    input.read_exact(&mut buffer[0..4])?;
+        let mut key_box = (0u8..=255).collect::<Vec<_>>();
 
-    let meta_data_len = get_u32(&buffer[..4]);
+        let mut j: usize = 0;
 
-    let music_meta: Option<MusicMeta> = if meta_data_len == 0 {
-        println!("{:>10}\tmetadata missing", "warning:");
-
-        None
-    } else {
-        let mut meta_data = vec![0; meta_data_len as usize];
-
-        input.read_exact(&mut meta_data)?;
-
-        for data in &mut meta_data {
-            *data ^= 0x63;
+        for i in 0..256 {
+            j = (key_box[i] as usize + j + key_data[i % key_len] as usize) & 0xff;
+            key_box.swap(i, j);
         }
 
-        // meta_data == "163 key(Don't modify):" + base64 string
-
-        let cipher = Aes128Ecb::new_var(&META_KEY, Default::default()).unwrap();
-
-        let mut bytes = decode(&meta_data[22..]).unwrap();
-
-        let meta_data_decoded = cipher.decrypt(&mut bytes).unwrap();
-
-        // meta_data_decoded == "music:" + json string
-
-        let music_meta: MusicMeta = json::from_str(str::from_utf8(&meta_data_decoded[6..])?)?;
-
-        println!("{:>10}\t{}", "musicId", music_meta.music_id);
-        println!("{:>10}\t{}", "musicName", music_meta.music_name);
-        println!("{:>10}\t{}", "album", music_meta.album);
-        println!("{:>10}\t{}", "format", music_meta.format);
-
-        Some(music_meta)
+        {
+            let mut new_key_box = [0u8; 256];
+            for (i, item) in new_key_box.iter_mut().enumerate() {
+                *item = key_box[(key_box[i] as usize
+                    + key_box[(((key_box[i]) as usize) + i) & 0xff] as usize)
+                    & 0xff];
+            }
+            new_key_box
+        }
     };
 
-    // input.read_exact(&mut buffer[0..4])?;
-
-    // let crc32 = get_u32(&buffer[..4]);
-
-    // println!("crc32 = {:?}", crc32);
-
-    // input.seek_relative(5);
-    input.seek(io::SeekFrom::Current(9))?;
-
-    input.read_exact(&mut buffer[0..4])?;
-
-    let image_size = get_u32(&buffer[..4]);
-
-    let mut image = vec![0; image_size as usize];
-
-    let image_mime_type = if image_size >= 8 {
-        input.read_exact(&mut image)?;
-
-        match &image[..8] {
-            [137, 80, 78, 71, 13, 10, 26, 10] => "image/png",
-            [0xFF, 0xD8, 0xFF, 0xE0, _, _, _, _] => "image/jpeg",
-            [71, 73, 70, _, _, _, _, _] => "image/gif",
-            _ => "image/*",
-        }
-    } else {
-        if music_meta.is_some() {
-            input.seek(io::SeekFrom::Start(8367))?;
-        }
-
-        ""
-    };
-
-    let mut target_path = file_path;
-    {
+    let music_meta: Option<MusicMeta> = {
         input.read_exact(&mut buffer[0..4])?;
+        let meta_data_len = get_u32(&buffer[..4]);
+
+        if meta_data_len == 0 {
+            println!("{:>10}\tmetadata missing", "warning:");
+
+            None
+        } else {
+            let mut meta_data = vec![0; meta_data_len as usize];
+            input.read_exact(&mut meta_data)?;
+
+            for data in &mut meta_data {
+                *data ^= 0x63;
+            }
+
+            // meta_data == "163 key(Don't modify):" + base64 string
+
+            let cipher = Aes128Ecb::new_var(&META_KEY, Default::default()).unwrap();
+
+            let mut bytes = decode(&meta_data[22..]).unwrap();
+
+            let meta_data_decoded = cipher.decrypt(&mut bytes).unwrap();
+
+            // meta_data_decoded == "music:" + json string
+
+            let music_meta: MusicMeta = json::from_str(str::from_utf8(&meta_data_decoded[6..])?)?;
+
+            println!("{:>10}\t{}", "musicId", music_meta.music_id);
+            println!("{:>10}\t{}", "musicName", music_meta.music_name);
+            println!("{:>10}\t{}", "album", music_meta.album);
+            println!("{:>10}\t{}", "format", music_meta.format);
+
+            Some(music_meta)
+        }
+    };
+
+    // crc32
+    // {
+    //     input.read_exact(&mut buffer[0..4])?;
+    //     let crc32 = get_u32(&buffer[..4]);
+
+    //     println!("{:>10}\t{:x}", "crc32", crc32);
+    // }
+
+    input.seek(Current(5))?;
+
+    let offset = {
+        input.read_exact(&mut buffer[0..4])?;
+
+        u64::from(get_u32(&buffer[0..4]))
+    };
+
+    let image_size = {
+        input.read_exact(&mut buffer[0..4])?;
+        get_u32(&buffer[..4])
+    };
+
+    let offset_from_start = input.seek(Current(0)).unwrap() + offset;
+
+    let image = {
+        if image_size > 0 {
+            let mut image = vec![0; image_size as usize];
+            input.read_exact(&mut image)?;
+
+            Some(image)
+        } else {
+            None
+        }
+    };
+
+    input.seek(Start(offset_from_start))?;
+
+    let (target_path, ext_format) = {
+        let mut target_path = file_path;
+
+        input.read_exact(&mut buffer[0..4])?;
+        input.seek(Current(-4))?;
 
         for (i, item) in buffer.iter_mut().enumerate().take(4) {
             let j = (i + 1) & 0xff;
-            *item ^= new_key_box[j];
+            *item ^= key_data[j];
         }
 
-        if buffer[..4] == [0x66, 0x4c, 0x61, 0x43] {
-            target_path.set_extension("flac");
-        } else {
-            target_path.set_extension("mp3");
+        match &buffer[0..4] {
+            // fLaC
+            [0x66, 0x4c, 0x61, 0x43] => {
+                target_path.set_extension("flac");
+                (target_path, "flac")
+            }
+            // ID3
+            [0x49, 0x44, 0x33, _] => {
+                target_path.set_extension("mp3");
+                (target_path, "mp3")
+            }
+            _ => {
+                // probably mp3
+                target_path.set_extension("mp3");
+                (target_path, "mp3")
+            }
         }
-        input.seek(io::SeekFrom::Current(-4))?;
-    }
+    };
 
+    // write file
     {
         let mut output = OpenOptions::new()
             .write(true)
@@ -218,19 +250,33 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
             }
             for (i, item) in buffer.iter_mut().enumerate().take(read_size) {
                 let j = (i + 1) & 0xff;
-                *item ^= new_key_box[j];
+                *item ^= key_data[j];
             }
 
             output.write_all(&buffer[..read_size])?;
         }
     }
 
-    if let Some(music_meta) = music_meta {
-        match &music_meta.format[..] {
+    {
+        let image_mime_type = {
+            if let Some(image) = &image {
+                match &image[..8] {
+                    [137, 80, 78, 71, 13, 10, 26, 10] => Some("image/png"),
+                    [0xFF, 0xD8, 0xFF, 0xE0, _, _, _, _] => Some("image/jpeg"),
+                    [71, 73, 70, _, _, _, _, _] => Some("image/gif"),
+                    _ => None,
+                }
+            } else {
+                None
+            }
+        };
+
+        match ext_format {
             "flac" => {
                 let mut tag = metaflac::Tag::read_from_path(&target_path)?;
-                {
-                    let vorbis_comment = tag.vorbis_comments_mut();
+                let vorbis_comment = tag.vorbis_comments_mut();
+
+                if let Some(music_meta) = music_meta {
                     vorbis_comment.set_title(vec![music_meta.music_name]);
                     vorbis_comment.set_album(vec![music_meta.album]);
                     vorbis_comment.set_artist(
@@ -241,7 +287,10 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
                             .collect::<Vec<_>>(),
                     );
                 }
-                if image_size >= 8 {
+
+                vorbis_comment.set("DESCRIPTION", vec![DESCRIPTION]);
+
+                if let (Some(image), Some(image_mime_type)) = (image, image_mime_type) {
                     tag.add_picture(
                         image_mime_type,
                         metaflac::block::PictureType::CoverFront,
@@ -253,23 +302,26 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
             }
             "mp3" => {
                 let mut tag = id3::Tag::read_from_path(&target_path)?;
-                tag.set_title(music_meta.music_name);
-                tag.set_album(music_meta.album);
-                tag.set_artist(
-                    music_meta
-                        .artist
-                        .into_iter()
-                        .map(|ar| ar.0)
-                        .collect::<Vec<_>>()
-                        .join("/"),
-                );
+                if let Some(music_meta) = music_meta {
+                    tag.set_title(music_meta.music_name);
+                    tag.set_album(music_meta.album);
+                    tag.set_artist(
+                        music_meta
+                            .artist
+                            .into_iter()
+                            .map(|ar| ar.0)
+                            .collect::<Vec<_>>()
+                            .join("/"),
+                    );
+                }
 
-                // tag.add_comment(id3::frame::Comment {
-                //     lang: "XXX".to_string(),
-                //     description: "".to_string(),
-                //     text: String::from_utf8(meta_data)?,
-                // });
-                if image_size >= 8 {
+                tag.add_comment(id3::frame::Comment {
+                    lang: "eng".to_string(),
+                    description: "converter".to_string(),
+                    text: DESCRIPTION.to_string(),
+                });
+
+                if let (Some(image), Some(image_mime_type)) = (image, image_mime_type) {
                     tag.add_picture(id3::frame::Picture {
                         mime_type: image_mime_type.to_string(),
                         picture_type: id3::frame::PictureType::CoverFront,
