@@ -90,7 +90,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
     type Aes128Ecb = Ecb<Aes128, Pkcs7>;
 
-    let key_data = {
+    let key_box = {
         let mut key_data = {
             input.read_exact(&mut buffer[0..4])?;
             let key_len = get_u32(&buffer[..4]);
@@ -122,15 +122,17 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
             key_box.swap(i, j);
         }
 
-        {
-            let mut new_key_box = [0u8; 256];
-            for (i, item) in new_key_box.iter_mut().enumerate() {
-                *item = key_box[(key_box[i] as usize
-                    + key_box[(((key_box[i]) as usize) + i) & 0xff] as usize)
-                    & 0xff];
-            }
-            new_key_box
-        }
+        key_box
+            .iter()
+            .enumerate()
+            .map(|(i, _)| {
+                let i = (i + 1) & 0xff;
+                let si: usize = key_box[i].into();
+                let sj: usize = key_box[(i + si) & 0xff].into();
+
+                key_box[(si + sj) & 0xff]
+            })
+            .collect::<Vec<_>>()
     };
 
     let music_meta: Option<MusicMeta> = {
@@ -213,8 +215,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
         input.seek(Current(-4))?;
 
         for (i, item) in buffer.iter_mut().enumerate().take(4) {
-            let j = (i + 1) & 0xff;
-            *item ^= key_data[j];
+            *item ^= key_box[i & 0xff];
         }
 
         match &buffer[0..4] {
@@ -249,8 +250,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
                 break;
             }
             for (i, item) in buffer.iter_mut().enumerate().take(read_size) {
-                let j = (i + 1) & 0xff;
-                *item ^= key_data[j];
+                *item ^= key_box[i & 0xff];
             }
 
             output.write_all(&buffer[..read_size])?;
