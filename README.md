@@ -1,4 +1,4 @@
-# ncmc &middot; [![Build Status](https://travis-ci.org/magic-akari/ncmc.svg?branch=master)](https://travis-ci.org/magic-akari/ncmc) [![Build status](https://ci.appveyor.com/api/projects/status/qj0uc19p1oxuxn0v?svg=true)](https://ci.appveyor.com/project/magic-akari/ncmc)
+# ncmc &middot; [![Build Status](https://travis-ci.org/magic-akari/ncmc.svg?branch=master)](https://travis-ci.org/magic-akari/ncmc) [![Build status](https://ci.appveyor.com/api/projects/status/qj0uc19p1oxuxn0v?svg=true)](https://ci.appveyor.com/project/magic-akari/ncmc) [![Crates.io](https://img.shields.io/crates/v/ncmc.svg?label=ncmc)](https://crates.io/crates/ncmc)
 
 ## How do I get it?
 
