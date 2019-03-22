@@ -239,10 +239,12 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
     // write file
     {
-        let mut output = OpenOptions::new()
-            .write(true)
-            .create_new(true)
-            .open(&target_path)?;
+        let mut output = io::BufWriter::new(
+            OpenOptions::new()
+                .write(true)
+                .create_new(true)
+                .open(&target_path)?,
+        );
 
         loop {
             let read_size = input.read(&mut buffer)?;
