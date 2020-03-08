@@ -6,7 +6,7 @@ use std::path::PathBuf;
 
 use ncmc::convert;
 
-fn main() -> Result<(), Box<error::Error>> {
+fn main() -> Result<(), Box<dyn error::Error>> {
     let args: Vec<String> = env::args().collect();
 
     let file_list = match args.len() {

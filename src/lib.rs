@@ -33,7 +33,7 @@ const META_KEY: [u8; 16] = [
 
 const BUFFER_SIZE: usize = 0x8000;
 
-const DESCRIPTION: &str = "converted by ncmc(https://github.com/magic-akari/ncmc).";
+const TOOL_INFO: &str = "converted by ncmc (https://github.com/magic-akari/ncmc)";
 
 #[derive(Debug)]
 struct SimpleError<'a>(&'a str);
@@ -49,7 +49,7 @@ impl<'a> error::Error for SimpleError<'a> {
         self.0
     }
 
-    fn cause(&self) -> Option<&error::Error> {
+    fn cause(&self) -> Option<&dyn error::Error> {
         None
     }
 }
@@ -76,7 +76,7 @@ fn get_u32(buffer: &[u8]) -> u32 {
         | u32::from(buffer[3]) << 24
 }
 
-pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
+pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<dyn error::Error>> {
     let mut input = io::BufReader::new(File::open(&file_path)?);
     let mut buffer = [0; BUFFER_SIZE];
     input.read_exact(&mut buffer[..8])?;
@@ -113,7 +113,7 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
         let key_len = key_data.len();
 
-        let mut key_box = (0u8..=255).collect::<Vec<_>>();
+        let mut key_box = (0u8..=255).collect::<Vec<u8>>();
 
         let mut j: usize = 0;
 
@@ -135,6 +135,8 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
             .collect::<Vec<_>>()
     };
 
+    let mut comment_163_key = String::default();
+
     let music_meta: Option<MusicMeta> = {
         input.read_exact(&mut buffer[0..4])?;
         let meta_data_len = get_u32(&buffer[..4]);
@@ -152,12 +154,13 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
             }
 
             // meta_data == "163 key(Don't modify):" + base64 string
+            comment_163_key = str::from_utf8(&mut meta_data)?.to_string();
 
-            let cipher = Aes128Ecb::new_var(&META_KEY, Default::default()).unwrap();
+            let cipher = Aes128Ecb::new_var(&META_KEY, Default::default())?;
 
-            let mut bytes = decode(&meta_data[22..]).unwrap();
+            let mut bytes = decode(&meta_data[22..])?;
 
-            let meta_data_decoded = cipher.decrypt(&mut bytes).unwrap();
+            let meta_data_decoded = cipher.decrypt(&mut bytes)?;
 
             // meta_data_decoded == "music:" + json string
 
@@ -290,7 +293,8 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
                     );
                 }
 
-                vorbis_comment.set("DESCRIPTION", vec![DESCRIPTION]);
+                vorbis_comment.set("DESCRIPTION", vec![comment_163_key, TOOL_INFO.to_string()]);
+                vorbis_comment.set("TOOL", vec![TOOL_INFO.to_string()]);
 
                 if let (Some(image), Some(image_mime_type)) = (image, image_mime_type) {
                     tag.add_picture(
@@ -319,9 +323,12 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<error::Error>> {
 
                 tag.add_comment(id3::frame::Comment {
                     lang: "eng".to_string(),
-                    description: "converter".to_string(),
-                    text: DESCRIPTION.to_string(),
+                    description: String::default(),
+                    text: comment_163_key.to_string(),
                 });
+
+                tag.set_text("TSSE", TOOL_INFO.to_string());
+                tag.set_text("TENC", TOOL_INFO.to_string());
 
                 if let (Some(image), Some(image_mime_type)) = (image, image_mime_type) {
                     tag.add_picture(id3::frame::Picture {
