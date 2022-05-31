@@ -1,0 +1,15 @@
+[package]
+name = "ncmc"
+version = "0.2.0"
+edition = "2021"
+description = "convert encrypted ncm file to original music file."
+authors = ["magic-akari <akari.ccino@gmail.com>"]
+homepage = "https://github.com/magic-akari/ncmc"
+repository = "https://github.com/magic-akari/ncmc"
+license = "MIT"
+readme = "README.md"
+keywords = ["ncm", "cli", "converter", "ncmdump"]
+
+[profile.release]
+panic = "abort"
+lto = true
