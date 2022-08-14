@@ -1,15 +1,15 @@
 [package]
-name = "ncmc"
-version = "0.2.0"
-edition = "2021"
+authors     = ["magic-akari <akari.ccino@gmail.com>"]
 description = "convert encrypted ncm file to original music file."
-authors = ["magic-akari <akari.ccino@gmail.com>"]
-homepage = "https://github.com/magic-akari/ncmc"
-repository = "https://github.com/magic-akari/ncmc"
-license = "MIT"
-readme = "README.md"
-keywords = ["ncm", "cli", "converter", "ncmdump"]
+edition     = "2021"
+homepage    = "https://github.com/magic-akari/ncmc"
+keywords    = ["ncm", "cli", "converter", "ncmdump"]
+license     = "MIT"
+name        = "ncmc"
+readme      = "README.md"
+repository  = "https://github.com/magic-akari/ncmc"
+version     = "0.2.0"
 
 [profile.release]
+lto   = true
 panic = "abort"
-lto = true

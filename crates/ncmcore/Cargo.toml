@@ -1,15 +1,18 @@
 [package]
-name = "ncmcore"
-version = "0.1.0"
-edition = "2021"
-authors = ["magic-akari <akari.ccino@gmail.com>"]
-homepage = "https://github.com/magic-akari/ncmc"
+authors    = ["magic-akari <akari.ccino@gmail.com>"]
+edition    = "2021"
+homepage   = "https://github.com/magic-akari/ncmc"
+license    = "MIT"
+name       = "ncmcore"
+readme     = "README.md"
 repository = "https://github.com/magic-akari/ncmc"
-license = "MIT"
-readme = "README.md"
+version    = "0.1.0"
 
 [dependencies]
-aes = "0.8.1"
-ecb = "0.1.0"
-anyhow = "1.0.57"
+aes    = "0.8.1"
+anyhow = "1.0.60"
 base64 = "0.13.0"
+ecb    = "0.1.1"
+
+[dev-dependencies]
+testing_macros = "0.2.7"

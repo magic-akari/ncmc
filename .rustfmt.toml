@@ -1,5 +1,5 @@
-format_strings = true
-imports_granularity = "Crate"
+format_strings           = true
+imports_granularity      = "Crate"
+reorder_imports          = true
 use_field_init_shorthand = true
-wrap_comments = true
-reorder_imports = true
+wrap_comments            = true
