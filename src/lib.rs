@@ -5,9 +5,11 @@ use miniserde::json;
 
 use std::error;
 use std::fmt;
+use std::fs;
 use std::fs::{File, OpenOptions};
 use std::path::PathBuf;
 use std::str;
+use std::str::FromStr;
 use std::{
     io,
     io::prelude::{Read, Seek, Write},
@@ -33,7 +35,7 @@ const META_KEY: [u8; 16] = [
 
 const BUFFER_SIZE: usize = 0x8000;
 
-const TOOL_INFO: &str = "converted by ncmc (https://github.com/magic-akari/ncmc)";
+const TOOL_INFO: &str = "converted by ncmc (https://github.com/MondoGao/ncmc)";
 
 #[derive(Debug)]
 struct SimpleError<'a>(&'a str);
@@ -212,7 +214,11 @@ pub fn convert(file_path: PathBuf) -> Result<PathBuf, Box<dyn error::Error>> {
     input.seek(Start(offset_from_start))?;
 
     let (target_path, ext_format) = {
-        let mut target_path = file_path;
+        let target_dir: PathBuf = PathBuf::from_str("converted").expect("err");
+        if !target_dir.exists() {
+            fs::create_dir(&target_dir)?;
+        }
+        let mut target_path = target_dir.join(file_path);
 
         input.read_exact(&mut buffer[0..4])?;
         input.seek(Current(-4))?;
