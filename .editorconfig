@@ -1,11 +1,12 @@
-# Check http://editorconfig.org for more information
-# This is the main config file for this project:
+# EditorConfig is awesome: https://EditorConfig.org
+
+# top-most EditorConfig file
 root = true
 
 [*]
-charset = utf-8
-trim_trailing_whitespace = true
-end_of_line = lf
 indent_style = space
-insert_final_newline = true
 indent_size = 4
+end_of_line = lf
+charset = utf-8
+trim_trailing_whitespace = false
+insert_final_newline = false

@@ -1,4 +1,4 @@
-# ncmc &middot; [![Crates.io](https://img.shields.io/crates/v/ncmc.svg?label=ncmc)](https://crates.io/crates/ncmc)
+# ncmc &middot; [![Test](https://github.com/magic-akari/ncmc/actions/workflows/test.yml/badge.svg)](https://github.com/magic-akari/ncmc/actions/workflows/test.yml) [![Crates.io](https://img.shields.io/crates/v/ncmc.svg?label=ncmc)](https://crates.io/crates/ncmc)
 
 ## Install
 
