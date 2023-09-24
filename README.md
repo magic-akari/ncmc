@@ -1,36 +1,22 @@
-# ncmc &middot; [![Build Status](https://travis-ci.org/magic-akari/ncmc.svg?branch=master)](https://travis-ci.org/magic-akari/ncmc) [![Build status](https://ci.appveyor.com/api/projects/status/qj0uc19p1oxuxn0v?svg=true)](https://ci.appveyor.com/project/magic-akari/ncmc) [![Crates.io](https://img.shields.io/crates/v/ncmc.svg?label=ncmc)](https://crates.io/crates/ncmc)
+# ncmc &middot; [![Crates.io](https://img.shields.io/crates/v/ncmc.svg?label=ncmc)](https://crates.io/crates/ncmc)
 
-## How do I get it?
+## Install
 
-install from cargo or download from [GitHub Release](https://github.com/magic-akari/ncmc/releases)
+Option 1: Download from [GitHub Release](https://github.com/magic-akari/ncmc/releases)
 
-Install
+Option 2: Install from source
 
-```
-> cargo install ncmc
+```bash
+cargo install ncmc
 ```
 
 If you don’t have cargo, install it with
-https://rustup.rs.
+https://rustup.rs
 
-## How do I use it?
-
-convert all ncm files in current directory
+## Usage
 
 ```
-ncmc
-```
-
-use with a path
-
-```
-ncmc some/path/contains/ncm/files
-```
-
-use with file list
-
-```
-ncmc 1.ncm ../2.ncm /path/to/3.ncm
+ncmc path/to/your/file.ncm
 ```
 
 ---

@@ -1,0 +1,16 @@
+[package]
+name = "ncm_core"
+
+authors    = { workspace = true }
+edition    = { workspace = true }
+homepage   = { workspace = true }
+license    = { workspace = true }
+readme     = { workspace = true }
+repository = { workspace = true }
+version    = { workspace = true }
+
+[dependencies]
+aes    = "0.8.3"
+anyhow = { workspace = true }
+base64 = "0.21.4"
+ecb    = "0.1.2"

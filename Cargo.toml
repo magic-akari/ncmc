@@ -1,29 +1,22 @@
-[package]
-name = "ncmc"
-version = "0.1.10"
-authors = ["阿卡琳 <hufan.akarin@Gmail.com>"]
-edition = "2018"
+[workspace]
+members  = ["crates/*"]
+resolver = "2"
 
-description = "convert encrypted ncm file to original music file."
-homepage = "https://github.com/magic-akari/ncmc"
-repository = "https://github.com/magic-akari/ncmc"
-license = "MIT"
-readme = "README.md"
-keywords = ["ncm", "converter", "ncmdump"]
+    [workspace.package]
+    authors    = ["magic-akari <akari.ccino@gmail.com>"]
+    edition    = "2021"
+    homepage   = "https://github.com/magic-akari/ncmc"
+    license    = "MIT"
+    readme     = "README.md"
+    repository = "https://github.com/magic-akari/ncmc"
+    version    = "0.2.0"
 
-[badges]
-travis-ci = { repository = "magic-akari/ncmc" }
-appveyor = { repository = "magic-akari/ncmc" }
-
-[dependencies]
-aes = "0.3.2"
-block-modes = "0.3.3"
-base64 = "0.11.0"
-glob = "0.3.0"
-metaflac = "0.2.2"
-id3 = "0.5.0"
-miniserde = "0.1.12"
+    [workspace.dependencies]
+    anyhow   = "1.0.75"
+    ncm_core = { version = "0.2.0", path = "crates/ncm_core" }
+    ncm_meta = { version = "0.2.0", path = "crates/ncm_meta" }
 
 [profile.release]
+lto   = true
 panic = "abort"
-lto = true
+strip = "debuginfo"

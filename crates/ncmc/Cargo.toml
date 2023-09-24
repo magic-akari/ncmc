@@ -1,0 +1,19 @@
+[package]
+description = "convert encrypted ncm file to original music file."
+keywords    = ["ncm", "cli", "converter", "ncmdump"]
+name        = "ncmc"
+
+authors    = { workspace = true }
+edition    = { workspace = true }
+homepage   = { workspace = true }
+license    = { workspace = true }
+readme     = { workspace = true }
+repository = { workspace = true }
+version    = { workspace = true }
+
+
+[dependencies]
+anyhow   = { workspace = true }
+bpaf     = { version = "0.9", features = ["derive"] }
+ncm_core = { workspace = true }
+ncm_meta = { workspace = true }

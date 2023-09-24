@@ -1,0 +1,17 @@
+[package]
+name = "ncm_meta"
+
+authors    = { workspace = true }
+edition    = { workspace = true }
+homepage   = { workspace = true }
+license    = { workspace = true }
+readme     = { workspace = true }
+repository = { workspace = true }
+version    = { workspace = true }
+
+[dependencies]
+anyhow    = { workspace = true }
+id3       = "1.8.0"
+metaflac  = "0.2.5"
+miniserde = "0.1"
+ncm_core  = { workspace = true }
