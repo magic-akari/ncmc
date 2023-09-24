@@ -1,0 +1,37 @@
+name: Test
+
+on:
+    push:
+        branches:
+            - "*"
+    pull_request:
+        types: ["opened", "reopened", "synchronize"]
+
+env:
+    CARGO_INCREMENTAL: 0
+    CARGO_TERM_COLOR: "always"
+    DIFF: 0
+    RUST_LOG: "off"
+
+jobs:
+    cargo-fmt:
+        name: Cargo fmt
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - run: cargo fmt -- --check
+
+    cargo-clippy:
+        name: Cargo clippy
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - run: cargo clippy
+
+    cargo-test:
+        name: Cargo test
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - run: cargo check
+            - run: cargo test

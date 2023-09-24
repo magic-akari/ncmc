@@ -37,7 +37,7 @@ fn main() -> Result<()> {
 
 fn auto(input_list: &[PathBuf]) -> Result<()> {
     for path in input_list {
-        let reader = fs::File::open(&path).with_context(|| format!("input {}", path.display()))?;
+        let reader = fs::File::open(path).with_context(|| format!("input {}", path.display()))?;
         let decoder = Decoder::decode(reader)?;
         let ext = decoder.ext();
         let output = Path::new(&path).with_extension(ext);
@@ -56,11 +56,11 @@ fn auto(input_list: &[PathBuf]) -> Result<()> {
 
 fn dump(input_list: &[PathBuf]) -> Result<()> {
     for path in input_list {
-        let reader = fs::File::open(&path).with_context(|| format!("input {}", path.display()))?;
+        let reader = fs::File::open(path).with_context(|| format!("input {}", path.display()))?;
         println!("{}", path.display());
 
         let Decoder { key, comment, meta, image, mut audio } = Decoder::decode(reader)?;
-        
+
         {
             let meta = String::from_utf8_lossy(&meta);
             eprintln!("{meta}");

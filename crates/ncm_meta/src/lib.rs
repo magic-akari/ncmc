@@ -11,7 +11,7 @@ use std::{
 
 use crate::music_meta::MusicMeta;
 
-const TOOL_INFO: &'static str = include_str!("tool_info");
+const TOOL_INFO: &str = include_str!("tool_info");
 
 pub struct Encoder {
     pub data: Vec<u8>,
