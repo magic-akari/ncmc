@@ -95,8 +95,15 @@ jobs:
               if: runner.os != 'Windows' && matrix.target != 'wasm32-wasi'
               run: |
                   BIN_NAME=ncmc-${{ matrix.code-target }}
-                  mv target/${{ matrix.target }}/release/ncmc.wasm .
+                  mv target/${{ matrix.target }}/release/ncmc .
                   tar czf $BIN_NAME.tar.gz ncmc
+
+            - name: Archive Binary
+              if: matrix.target == 'wasm32-wasi'
+              run: |
+                  BIN_NAME=ncmc-${{ matrix.code-target }}
+                  mv target/${{ matrix.target }}/release/ncmc.wasm .
+                  tar czf $BIN_NAME.tar.gz ncmc.wasm
 
             - name: Upload Binary
               uses: actions/upload-artifact@v3
@@ -106,7 +113,6 @@ jobs:
                   path: |
                       *.zip
                       *.tar.gz
-                      target/wasm32-wasi/release/ncmc.wasm
 
             - name: Release
               uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
@@ -114,4 +120,3 @@ jobs:
                   files: |
                       *.zip
                       *.tar.gz
-                      target/wasm32-wasi/release/ncmc.wasm
