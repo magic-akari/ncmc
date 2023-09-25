@@ -1,4 +1,4 @@
-use anyhow::{Context, Ok, Result};
+use anyhow::{Context, Result};
 use bpaf::Bpaf;
 use ncm_core::decoder::Decoder;
 use ncm_meta::Encoder;
@@ -51,7 +51,7 @@ fn auto(input_list: &[PathBuf]) -> Result<()> {
         fs::write(output, data)?;
     }
 
-    Ok(())
+    anyhow::Ok(())
 }
 
 fn dump(input_list: &[PathBuf]) -> Result<()> {
@@ -62,18 +62,26 @@ fn dump(input_list: &[PathBuf]) -> Result<()> {
         let Decoder { key, comment, meta, image, mut audio } = Decoder::decode(reader)?;
 
         {
-            let meta = String::from_utf8_lossy(&meta);
+            let meta = if let Some(meta) = &meta {
+                String::from_utf8_lossy(meta)
+            } else {
+                "meta not found".into()
+            };
             eprintln!("{meta}");
         }
 
         let key_path = path.with_extension("key");
         fs::write(key_path, key)?;
 
-        let comment_path = path.with_extension("comment");
-        fs::write(comment_path, comment)?;
+        if let Some(comment) = comment {
+            let comment_path = path.with_extension("comment");
+            fs::write(comment_path, comment)?;
+        }
 
-        let meta_path = path.with_extension("json");
-        fs::write(meta_path, meta)?;
+        if let Some(meta) = meta {
+            let meta_path = path.with_extension("json");
+            fs::write(meta_path, meta)?;
+        }
 
         if let Some(image) = image {
             let image_path = path.with_extension(image.ext());
@@ -87,5 +95,5 @@ fn dump(input_list: &[PathBuf]) -> Result<()> {
         io::copy(&mut audio, &mut file)?;
     }
 
-    Ok(())
+    anyhow::Ok(())
 }
