@@ -30,33 +30,33 @@ jobs:
                 include:
                     - os: windows-latest
                       target: x86_64-pc-windows-msvc
-                      code-target: win32-x64
+                      archive-name: win32-x64
 
                     - os: windows-latest
                       target: aarch64-pc-windows-msvc
-                      code-target: win32-arm64
+                      archive-name: win32-arm64
 
                     - os: ubuntu-latest
                       target: x86_64-unknown-linux-gnu
-                      code-target: linux-x64
+                      archive-name: linux-x64
 
                     - os: ubuntu-latest
                       target: aarch64-unknown-linux-gnu
-                      code-target: linux-arm64
+                      archive-name: linux-arm64
 
                     - os: ubuntu-latest
                       target: wasm32-wasi
-                      code-target: wasm32-wasi
+                      archive-name: wasm32-wasi
 
                     - os: macos-latest
                       target: x86_64-apple-darwin
-                      code-target: darwin-x64
+                      archive-name: macos-x64
 
                     - os: macos-latest
                       target: aarch64-apple-darwin
-                      code-target: darwin-arm64
+                      archive-name: macos-arm64
 
-        name: Package ${{ matrix.code-target }}
+        name: Package ${{ matrix.archive-name }}
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v4
@@ -65,7 +65,7 @@ jobs:
               run: rustup target add ${{ matrix.target }}
 
             - name: Install arm64 toolchain
-              if: matrix.code-target == 'linux-arm64'
+              if: matrix.target == 'aarch64-unknown-linux-gnu'
               run: |
                   sudo apt-get update
                   sudo apt-get install -y gcc-aarch64-linux-gnu
@@ -86,7 +86,7 @@ jobs:
               if: runner.os == 'Windows'
               shell: bash
               run: |
-                  BIN_NAME=ncmc-${{ matrix.code-target }}
+                  BIN_NAME=ncmc-${{ matrix.archive-name }}
                   mv target/${{ matrix.target }}/release/ncmc.exe .
                   7z a $BIN_NAME.zip ncmc.exe
 
@@ -94,14 +94,14 @@ jobs:
             - name: Archive Binary
               if: runner.os != 'Windows' && matrix.target != 'wasm32-wasi'
               run: |
-                  BIN_NAME=ncmc-${{ matrix.code-target }}
+                  BIN_NAME=ncmc-${{ matrix.archive-name }}
                   mv target/${{ matrix.target }}/release/ncmc .
                   tar czf $BIN_NAME.tar.gz ncmc
 
             - name: Archive Binary
               if: matrix.target == 'wasm32-wasi'
               run: |
-                  BIN_NAME=ncmc-${{ matrix.code-target }}
+                  BIN_NAME=ncmc-${{ matrix.archive-name }}
                   mv target/${{ matrix.target }}/release/ncmc.wasm .
                   tar czf $BIN_NAME.tar.gz ncmc.wasm
 
