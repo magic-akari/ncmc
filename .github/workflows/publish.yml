@@ -1,0 +1,117 @@
+name: Publish
+
+on:
+    push:
+        tags:
+            - "v*"
+
+env:
+    CARGO_INCREMENTAL: 0
+    CARGO_TERM_COLOR: "always"
+    RUST_LOG: "off"
+
+jobs:
+    publish-crates:
+        if: startsWith(github.ref, 'refs/tags/v')
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+            - run: |
+                  cargo publish -p ncm_core --token ${CRATES_TOKEN}
+                  cargo publish -p ncm_meta --token ${CRATES_TOKEN}
+                  cargo publish -p ncmc --token ${CRATES_TOKEN}
+              env:
+                  CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+
+    publish-github-release:
+        if: startsWith(github.ref, 'refs/tags/v')
+        strategy:
+            matrix:
+                include:
+                    - os: windows-latest
+                      target: x86_64-pc-windows-msvc
+                      code-target: win32-x64
+
+                    - os: windows-latest
+                      target: aarch64-pc-windows-msvc
+                      code-target: win32-arm64
+
+                    - os: ubuntu-latest
+                      target: x86_64-unknown-linux-gnu
+                      code-target: linux-x64
+
+                    - os: ubuntu-latest
+                      target: aarch64-unknown-linux-gnu
+                      code-target: linux-arm64-gnu
+
+                    - os: ubuntu-latest
+                      target: wasm32-wasi
+                      code-target: wasm32-wasi
+
+                    - os: macos-latest
+                      target: x86_64-apple-darwin
+                      code-target: darwin-x64
+
+                    - os: macos-latest
+                      target: aarch64-apple-darwin
+                      code-target: darwin-arm64
+
+        name: Package ${{ matrix.code-target }}
+        runs-on: ${{ matrix.os }}
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Install Rust toolchain
+              run: rustup target add ${{ matrix.target }}
+
+            - name: Install arm64 toolchain
+              if: matrix.code-target == 'linux-arm64'
+              run: |
+                  sudo apt-get update
+                  sudo apt-get install -y gcc-aarch64-linux-gnu
+
+            - name: Cache
+              uses: Swatinem/rust-cache@v2
+              with:
+                  shared-key: release-${{ matrix.target }}
+
+            - name: Build Binary
+              # strip debug symbols from std, see https://github.com/johnthagen/min-sized-rust#remove-panic-string-formatting-with-panic_immediate_abort
+              run: cargo build --release --target ${{ matrix.target }} -p ncmc
+              env:
+                  CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
+
+              # The binary is zipped to fix permission loss https://github.com/actions/upload-artifact#permission-loss
+            - name: Archive Binary
+              if: runner.os == 'Windows'
+              shell: bash
+              run: |
+                  BIN_NAME=ncmc-${{ matrix.code-target }}
+                  mv target/${{ matrix.target }}/release/ncmc.exe .
+                  7z a $BIN_NAME.zip ncmc.exe
+
+              # The binary is zipped to fix permission loss https://github.com/actions/upload-artifact#permission-loss
+            - name: Archive Binary
+              if: runner.os != 'Windows' && matrix.target != 'wasm32-wasi'
+              run: |
+                  BIN_NAME=ncmc-${{ matrix.code-target }}
+                  mv target/${{ matrix.target }}/release/ncmc.wasm .
+                  tar czf $BIN_NAME.tar.gz ncmc
+
+            - name: Upload Binary
+              uses: actions/upload-artifact@v3
+              with:
+                  if-no-files-found: error
+                  name: binaries
+                  path: |
+                      *.zip
+                      *.tar.gz
+                      target/wasm32-wasi/release/ncmc.wasm
+
+            - name: Release
+              uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
+              with:
+                  files: |
+                      *.zip
+                      *.tar.gz
+                      target/wasm32-wasi/release/ncmc.wasm
