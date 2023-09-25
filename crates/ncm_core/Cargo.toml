@@ -1,6 +1,9 @@
 [package]
 name = "ncm_core"
 
+description = "core decoder for ncmc"
+keywords    = ["ncm", "ncmc", "ncmdump"]
+
 authors    = { workspace = true }
 edition    = { workspace = true }
 homepage   = { workspace = true }

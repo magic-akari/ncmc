@@ -1,6 +1,9 @@
 [package]
 name = "ncm_meta"
 
+description = "music meta utils for ncmc"
+keywords    = ["ncm", "ncmc", "ncmdump"]
+
 authors    = { workspace = true }
 edition    = { workspace = true }
 homepage   = { workspace = true }

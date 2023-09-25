@@ -1,7 +1,8 @@
 [package]
+name = "ncmc"
+
 description = "convert encrypted ncm file to original music file."
-keywords    = ["ncm", "cli", "converter", "ncmdump"]
-name        = "ncmc"
+keywords    = ["ncm", "ncmc", "cli", "converter", "ncmdump"]
 
 authors    = { workspace = true }
 edition    = { workspace = true }
