@@ -5,7 +5,7 @@ use crate::{
 };
 use anyhow::{ensure, Ok, Result};
 use base64::{engine::general_purpose::STANDARD as base64, Engine};
-use std::io::Read;
+use std::{io::Read, vec};
 
 #[derive(Debug)]
 pub struct Decoder<R>
@@ -13,8 +13,8 @@ where
     R: Read,
 {
     pub key: Vec<u8>,
-    pub comment: Option<Vec<u8>>,
-    pub meta: Option<Vec<u8>>,
+    pub comment: Vec<u8>,
+    pub meta: Vec<u8>,
     pub image: Option<Image>,
     pub audio: Audio<R>,
 }
@@ -39,24 +39,27 @@ where
             key[17..].to_vec()
         };
 
-        let (comment, meta) = {
+        let comment = {
             let (mut comment, _) = Self::read_frame(&mut input)?;
-
             if !comment.is_empty() {
                 comment.iter_mut().for_each(|byte| *byte ^= 99);
 
                 ensure!(&comment[..22] == b"163 key(Don't modify):", "Invalid comment");
-
-                let meta = &comment[22..];
-                let mut meta = base64.decode(meta)?;
-
-                let meta = decrypt_meta(&mut meta)?;
-
-                ensure!(&meta[..6] == b"music:", "Invalid meta");
-                (Some(comment), Some(meta[6..].to_vec()))
-            } else {
-                (None, None)
             }
+
+            comment
+        };
+
+        let meta = if !comment.is_empty() {
+            let meta = &comment[22..];
+            let mut meta = base64.decode(meta)?;
+
+            let meta = decrypt_meta(&mut meta)?;
+
+            ensure!(&meta[..6] == b"music:", "Invalid meta");
+            meta[6..].to_vec()
+        } else {
+            vec![]
         };
 
         Self::skip(&mut input, 5)?;

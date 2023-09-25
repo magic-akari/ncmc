@@ -26,16 +26,16 @@ impl Encoder {
         let mut buffer = vec![];
         let audio_type = decoder.audio_type();
 
-        let Decoder { comment: Some(comment), meta: Some(meta), image, mut audio, .. } = decoder
-        else {
-            return Ok(Self { data: buffer, meta: "meta not found".into() });
-        };
-
-        let meta = String::from_utf8_lossy(&meta);
-
-        let music_meta: MusicMeta = json::from_str(&meta)?;
+        let Decoder { comment, meta, image, mut audio, .. } = decoder;
 
         audio.read_to_end(&mut buffer)?;
+
+        if meta.is_empty() {
+            return Ok(Self { data: buffer, meta: "meta not found".into() });
+        }
+
+        let meta = String::from_utf8_lossy(&meta);
+        let music_meta: MusicMeta = json::from_str(&meta)?;
 
         match audio_type {
             AudioType::Flac => {

@@ -62,8 +62,8 @@ fn dump(input_list: &[PathBuf]) -> Result<()> {
         let Decoder { key, comment, meta, image, mut audio } = Decoder::decode(reader)?;
 
         {
-            let meta = if let Some(meta) = &meta {
-                String::from_utf8_lossy(meta)
+            let meta = if !meta.is_empty() {
+                String::from_utf8_lossy(&meta)
             } else {
                 "meta not found".into()
             };
@@ -73,12 +73,12 @@ fn dump(input_list: &[PathBuf]) -> Result<()> {
         let key_path = path.with_extension("key");
         fs::write(key_path, key)?;
 
-        if let Some(comment) = comment {
+        if !comment.is_empty() {
             let comment_path = path.with_extension("comment");
             fs::write(comment_path, comment)?;
         }
 
-        if let Some(meta) = meta {
+        if !meta.is_empty() {
             let meta_path = path.with_extension("json");
             fs::write(meta_path, meta)?;
         }
