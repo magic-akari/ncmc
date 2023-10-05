@@ -34,7 +34,7 @@ jobs:
 
                     - os: windows-latest
                       target: i686-pc-windows-msvc
-                      archive-name: win32-x86
+                      archive-name: win32-i686
 
                     - os: windows-latest
                       target: aarch64-pc-windows-msvc
