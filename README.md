@@ -2,7 +2,7 @@
 
 ## Install
 
-Option 1: Download from [GitHub Release](https://github.com/magic-akari/ncmc/releases)
+Option 1: Download from [GitHub Release](https://github.com/magic-akari/ncmc/releases/latest)
 
 Option 2: Install from source
 
