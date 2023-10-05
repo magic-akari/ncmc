@@ -33,6 +33,10 @@ jobs:
                       archive-name: win32-x64
 
                     - os: windows-latest
+                      target: i686-pc-windows-msvc
+                      archive-name: win32-x86
+
+                    - os: windows-latest
                       target: aarch64-pc-windows-msvc
                       archive-name: win32-arm64
 
@@ -43,6 +47,26 @@ jobs:
                     - os: ubuntu-latest
                       target: aarch64-unknown-linux-gnu
                       archive-name: linux-arm64
+                      extra-toolchain: gcc-aarch64-linux-gnu
+
+                    - os: ubuntu-latest
+                      target: riscv64gc-unknown-linux-gnu
+                      archive-name: linux-riscv64
+                      extra-toolchain: gcc-riscv64-linux-gnu
+
+                    - os: ubuntu-latest
+                      target: loongarch64-unknown-linux-gnu
+                      archive-name: linux-loongarch64
+
+                    - os: ubuntu-latest
+                      target: armv7-unknown-linux-gnueabihf
+                      archive-name: linux-armv7
+                      extra-toolchain: gcc-arm-linux-gnueabihf
+
+                    - os: ubuntu-latest
+                      target: arm-unknown-linux-gnueabi
+                      archive-name: linux-armv6
+                      extra-toolchain: gcc-arm-linux-gnueabi
 
                     - os: ubuntu-latest
                       target: wasm32-wasi
@@ -64,11 +88,26 @@ jobs:
             - name: Install Rust toolchain
               run: rustup target add ${{ matrix.target }}
 
-            - name: Install arm64 toolchain
-              if: matrix.target == 'aarch64-unknown-linux-gnu'
+            - name: Install extra toolchain
+              if: matrix.extra-toolchain
               run: |
                   sudo apt-get update
-                  sudo apt-get install -y gcc-aarch64-linux-gnu
+                  sudo apt-get install -y ${{ matrix.extra-toolchain }}
+
+            - name: Install extra toolchain
+              if: matrix.target == 'loongarch64-unknown-linux-gnu'
+              run: |
+                  mkdir ${{ runner.tool_cache }}/larch
+                  wget -O- -q https://github.com/loongson/build-tools/releases/download/2023.08.08/CLFS-loongarch64-8.1-x86_64-cross-tools-gcc-glibc.tar.xz | tar -C ${{ runner.tool_cache }}/larch --strip-components=1 --xz -xf -
+
+                  for i in objdump objcopy strip; do
+                      ln -sf ${{ runner.tool_cache }}/larch/bin/loongarch64-unknown-linux-gnu-$i ${{ runner.tool_cache }}/loongarch64-linux-gnu-$i
+                  done
+
+                  echo '${{ runner.tool_cache }}/larch/bin/loongarch64-unknown-linux-gnu-gcc -L${{ runner.tool_cache }}/larch/loongarch64-unknown-linux-gnu "$@"' > ${{ runner.tool_cache }}/loongarch64-linux-gnu-gcc
+                  echo '${{ runner.tool_cache }}/larch/bin/loongarch64-unknown-linux-gnu-g++ -L${{ runner.tool_cache }}/larch/loongarch64-unknown-linux-gnu "$@"' > ${{ runner.tool_cache }}/loongarch64-linux-gnu-g++
+                  chmod 755 ${{ runner.tool_cache }}/loongarch64-linux-gnu-{gcc,g++}
+                  echo ${{ runner.tool_cache }} >> $GITHUB_PATH
 
             - name: Cache
               uses: Swatinem/rust-cache@v2
@@ -78,8 +117,6 @@ jobs:
             - name: Build Binary
               # strip debug symbols from std, see https://github.com/johnthagen/min-sized-rust#remove-panic-string-formatting-with-panic_immediate_abort
               run: cargo build --release --target ${{ matrix.target }} -p ncmc
-              env:
-                  CARGO_TARGET_AARCH64_UNKNOWN_LINUX_GNU_LINKER: aarch64-linux-gnu-gcc
 
               # The binary is zipped to fix permission loss https://github.com/actions/upload-artifact#permission-loss
             - name: Archive Binary
