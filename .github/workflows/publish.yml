@@ -41,13 +41,14 @@ jobs:
                       archive-name: win32-arm64
 
                     - os: ubuntu-latest
-                      target: x86_64-unknown-linux-gnu
+                      target: x86_64-unknown-linux-musl
                       archive-name: linux-x64
+                      cross: true
 
                     - os: ubuntu-latest
-                      target: aarch64-unknown-linux-gnu
+                      target: aarch64-unknown-linux-musl
                       archive-name: linux-arm64
-                      extra-toolchain: gcc-aarch64-linux-gnu
+                      cross: true
 
                     - os: ubuntu-latest
                       target: riscv64gc-unknown-linux-gnu
@@ -59,14 +60,14 @@ jobs:
                       archive-name: linux-loongarch64
 
                     - os: ubuntu-latest
-                      target: armv7-unknown-linux-gnueabihf
+                      target: armv7-unknown-linux-musleabihf
                       archive-name: linux-armv7
-                      extra-toolchain: gcc-arm-linux-gnueabihf
+                      cross: true
 
                     - os: ubuntu-latest
-                      target: arm-unknown-linux-gnueabi
+                      target: arm-unknown-linux-musleabi
                       archive-name: linux-armv6
-                      extra-toolchain: gcc-arm-linux-gnueabi
+                      cross: true
 
                     - os: ubuntu-latest
                       target: wasm32-wasi
@@ -115,6 +116,13 @@ jobs:
                   shared-key: release-${{ matrix.target }}
 
             - name: Build Binary
+              if: matrix.cross
+              run: |
+                  pip install cargo-zigbuild
+                  cargo zigbuild --release --target ${{ matrix.target }} -p ncmc
+
+            - name: Build Binary
+              if: matrix.cross != true
               # strip debug symbols from std, see https://github.com/johnthagen/min-sized-rust#remove-panic-string-formatting-with-panic_immediate_abort
               run: cargo build --release --target ${{ matrix.target }} -p ncmc
 
