@@ -9,12 +9,12 @@ resolver = "2"
     license    = "MIT"
     readme     = "README.md"
     repository = "https://github.com/magic-akari/ncmc"
-    version    = "0.2.5"
+    version    = "0.2.6"
 
     [workspace.dependencies]
     anyhow   = "1.0.75"
-    ncm_core = { version = "0.2.5", path = "crates/ncm_core" }
-    ncm_meta = { version = "0.2.5", path = "crates/ncm_meta" }
+    ncm_core = { version = "0.2.6", path = "crates/ncm_core" }
+    ncm_meta = { version = "0.2.6", path = "crates/ncm_meta" }
 
 [profile.release]
 lto   = true

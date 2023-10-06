@@ -234,7 +234,7 @@ dependencies = [
 
 [[package]]
 name = "ncm_core"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "aes",
  "anyhow",
@@ -244,7 +244,7 @@ dependencies = [
 
 [[package]]
 name = "ncm_meta"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "anyhow",
  "id3",
@@ -255,7 +255,7 @@ dependencies = [
 
 [[package]]
 name = "ncmc"
-version = "0.2.5"
+version = "0.2.6"
 dependencies = [
  "anyhow",
  "bpaf",
