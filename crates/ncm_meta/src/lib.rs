@@ -1,6 +1,6 @@
 mod music_meta;
 
-use anyhow::{Ok, Result};
+use anyhow::{Context, Ok, Result};
 use id3::TagLike;
 use miniserde::json;
 use ncm_core::{audio::Type as AudioType, decoder::Decoder};
@@ -35,7 +35,8 @@ impl Encoder {
         }
 
         let meta = String::from_utf8_lossy(&meta);
-        let music_meta: MusicMeta = json::from_str(&meta)?;
+        let music_meta: MusicMeta =
+            json::from_str(&meta).with_context(|| format!("failed to unpack: {meta}"))?;
 
         match audio_type {
             AudioType::Flac => {
