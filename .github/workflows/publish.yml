@@ -151,7 +151,7 @@ jobs:
                   tar czf $BIN_NAME.tar.gz ncmc.wasm
 
             - name: Upload Binary
-              uses: actions/upload-artifact@v3
+              uses: actions/upload-artifact@v4
               with:
                   if-no-files-found: error
                   name: binaries
