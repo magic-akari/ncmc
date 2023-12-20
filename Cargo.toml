@@ -9,7 +9,7 @@ resolver = "2"
     license    = "MIT"
     readme     = "README.md"
     repository = "https://github.com/magic-akari/ncmc"
-    version    = "0.2.6"
+    version    = "0.2.7"
 
     [workspace.dependencies]
     anyhow   = "1.0.75"
