@@ -13,7 +13,7 @@ repository = { workspace = true }
 version    = { workspace = true }
 
 [dependencies]
-aes    = "0.8.3"
+aes    = "0.8.4"
 anyhow = { workspace = true }
 base64 = "0.21.6"
 ecb    = "0.1.2"
