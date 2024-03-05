@@ -12,7 +12,7 @@ resolver = "2"
     version    = "0.2.8"
 
     [workspace.dependencies]
-    anyhow   = "1.0.75"
+    anyhow   = "1.0.80"
     ncm_core = { version = "0.2.8", path = "crates/ncm_core" }
     ncm_meta = { version = "0.2.8", path = "crates/ncm_meta" }
 

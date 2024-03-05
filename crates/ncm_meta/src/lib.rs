@@ -65,7 +65,7 @@ impl Encoder {
                 buffer.write_all(&data)?;
             }
             AudioType::Mp3 => {
-                let mut tag = id3::Tag::read_from(&mut Cursor::new(&buffer))?;
+                let mut tag = id3::Tag::read_from2(&mut Cursor::new(&buffer))?;
                 let mut data_reader = Cursor::new(&buffer);
                 id3::Tag::skip(&mut data_reader)?;
 
