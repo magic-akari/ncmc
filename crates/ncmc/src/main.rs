@@ -90,7 +90,7 @@ fn dump(input_list: &[PathBuf]) -> Result<()> {
 
         let audio_path = path.with_extension(audio.ext());
 
-        let mut file = fs::File::options().write(true).open(audio_path)?;
+        let mut file = fs::File::options().create(true).write(true).open(audio_path)?;
 
         io::copy(&mut audio, &mut file)?;
     }
