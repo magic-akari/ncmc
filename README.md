@@ -15,8 +15,12 @@ https://rustup.rs
 
 ## Usage
 
-```
+```bash
+# convert
 ncmc path/to/your/file.ncm
+
+# dump mode
+ncmc --dump path/to/your/file.ncm
 ```
 
 ---
