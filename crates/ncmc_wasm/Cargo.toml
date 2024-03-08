@@ -1,0 +1,25 @@
+[package]
+name = "ncmc_wasm"
+
+description = "convert encrypted ncm file to original music file."
+keywords    = ["ncm", "ncmc", "converter", "ncmdump"]
+
+authors    = { workspace = true }
+edition    = { workspace = true }
+homepage   = { workspace = true }
+license    = { workspace = true }
+readme     = { workspace = true }
+repository = { workspace = true }
+version    = { workspace = true }
+
+
+[dependencies]
+anyhow             = { workspace = true }
+js-sys             = "0.3.69"
+ncm_core           = { workspace = true }
+ncm_meta           = { workspace = true }
+serde-wasm-bindgen = "0.6"
+wasm-bindgen       = "0.2.92"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
