@@ -15,5 +15,5 @@ version    = { workspace = true }
 [dependencies]
 aes    = "0.8.4"
 anyhow = { workspace = true }
-base64 = "0.22.0"
+base64 = "0.22.1"
 ecb    = "0.1.2"
