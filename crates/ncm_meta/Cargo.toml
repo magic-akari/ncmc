@@ -16,5 +16,5 @@ version    = { workspace = true }
 anyhow    = { workspace = true }
 id3       = "1.13.1"
 metaflac  = "0.2.5"
-miniserde = "0.1"
+miniserde = "0.1.39"
 ncm_core  = { workspace = true }
