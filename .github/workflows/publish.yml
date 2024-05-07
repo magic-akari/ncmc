@@ -30,58 +30,51 @@ jobs:
                 include:
                     - os: windows-latest
                       target: x86_64-pc-windows-msvc
-                      archive-name: win32-x64
 
                     - os: windows-latest
                       target: i686-pc-windows-msvc
-                      archive-name: win32-i686
 
                     - os: windows-latest
                       target: aarch64-pc-windows-msvc
-                      archive-name: win32-arm64
 
                     - os: ubuntu-latest
                       target: x86_64-unknown-linux-musl
-                      archive-name: linux-x64
+
                       cross: true
 
                     - os: ubuntu-latest
                       target: aarch64-unknown-linux-musl
-                      archive-name: linux-arm64
+
                       cross: true
 
                     - os: ubuntu-latest
                       target: riscv64gc-unknown-linux-gnu
-                      archive-name: linux-riscv64
+
                       extra-toolchain: gcc-riscv64-linux-gnu
 
                     - os: ubuntu-latest
                       target: loongarch64-unknown-linux-gnu
-                      archive-name: linux-loongarch64
 
                     - os: ubuntu-latest
                       target: armv7-unknown-linux-musleabihf
-                      archive-name: linux-armv7
+
                       cross: true
 
                     - os: ubuntu-latest
                       target: arm-unknown-linux-musleabi
-                      archive-name: linux-armv6
+
                       cross: true
 
                     - os: ubuntu-latest
                       target: wasm32-wasi
-                      archive-name: wasm32-wasi
 
                     - os: macos-latest
                       target: x86_64-apple-darwin
-                      archive-name: macos-x64
 
                     - os: macos-latest
                       target: aarch64-apple-darwin
-                      archive-name: macos-arm64
 
-        name: Package ${{ matrix.archive-name }}
+        name: Package ${{ matrix.target }}
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v4
@@ -131,7 +124,7 @@ jobs:
               if: runner.os == 'Windows'
               shell: bash
               run: |
-                  BIN_NAME=ncmc-${{ matrix.archive-name }}
+                  BIN_NAME=ncmc-${{ matrix.target }}
                   mv target/${{ matrix.target }}/release/ncmc.exe .
                   7z a $BIN_NAME.zip ncmc.exe
 
@@ -139,29 +132,29 @@ jobs:
             - name: Archive Binary
               if: runner.os != 'Windows' && matrix.target != 'wasm32-wasi'
               run: |
-                  BIN_NAME=ncmc-${{ matrix.archive-name }}
+                  BIN_NAME=ncmc-${{ matrix.target }}
                   mv target/${{ matrix.target }}/release/ncmc .
-                  tar czf $BIN_NAME.tar.gz ncmc
+                  tar czf $BIN_NAME.tgz ncmc
 
             - name: Archive Binary
               if: matrix.target == 'wasm32-wasi'
               run: |
-                  BIN_NAME=ncmc-${{ matrix.archive-name }}
+                  BIN_NAME=ncmc-${{ matrix.target }}
                   mv target/${{ matrix.target }}/release/ncmc.wasm .
-                  tar czf $BIN_NAME.tar.gz ncmc.wasm
+                  tar czf $BIN_NAME.tgz ncmc.wasm
 
             - name: Upload Binary
               uses: actions/upload-artifact@v4
               with:
                   if-no-files-found: error
-                  name: ncmc-${{ matrix.archive-name }}
+                  name: ncmc-${{ matrix.target }}
                   path: |
                       *.zip
-                      *.tar.gz
+                      *.tgz
 
             - name: Release
               uses: softprops/action-gh-release@c9b46fe7aad9f02afd89b12450b780f52dacfb2d
               with:
                   files: |
                       *.zip
-                      *.tar.gz
+                      *.tgz
