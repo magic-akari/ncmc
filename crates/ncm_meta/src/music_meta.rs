@@ -16,19 +16,25 @@ pub(crate) struct MusicMeta {
 
 make_place!(Place);
 #[derive(Debug)]
-pub(crate) struct MusicId(u32);
+pub(crate) enum MusicId {
+    Num(u32),
+    Str(String),
+}
 
 impl de::Visitor for Place<MusicId> {
     fn string(&mut self, s: &str) -> miniserde::Result<()> {
-        let value: u32 = s.parse().map_err(|_| miniserde::Error)?;
-        self.out = Some(MusicId(value));
+        let out = match s.parse::<u32>() {
+            Ok(value) => MusicId::Num(value),
+            Err(..) => MusicId::Str(s.to_string()),
+        };
+        self.out = Some(out);
 
         Ok(())
     }
 
     fn nonnegative(&mut self, n: u64) -> miniserde::Result<()> {
         let value = n as u32;
-        self.out = Some(MusicId(value));
+        self.out = Some(MusicId::Num(value));
 
         Ok(())
     }
