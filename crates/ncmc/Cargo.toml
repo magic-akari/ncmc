@@ -15,6 +15,9 @@ version    = { workspace = true }
 
 [dependencies]
 anyhow   = { workspace = true }
-bpaf     = { version = "0.9", features = ["derive"] }
+bpaf     = { workspace = true, features = ["derive"] }
 ncm_core = { workspace = true }
 ncm_meta = { workspace = true }
+
+[dev-dependencies]
+testing = { workspace = true }

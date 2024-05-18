@@ -14,7 +14,10 @@ version    = { workspace = true }
 
 [dependencies]
 anyhow    = { workspace = true }
-id3       = "1.13.1"
-metaflac  = "0.2.5"
-miniserde = "0.1"
+id3       = { workspace = true }
+metaflac  = { workspace = true }
+miniserde = { workspace = true }
 ncm_core  = { workspace = true }
+
+[dev-dependencies]
+testing = { workspace = true }

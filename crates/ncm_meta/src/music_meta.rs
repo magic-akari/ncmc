@@ -16,6 +16,7 @@ pub(crate) struct MusicMeta {
 
 make_place!(Place);
 #[derive(Debug)]
+#[allow(dead_code)]
 pub(crate) enum MusicId {
     Num(u32),
     Str(String),
@@ -43,5 +44,27 @@ impl de::Visitor for Place<MusicId> {
 impl de::Deserialize for MusicId {
     fn begin(out: &mut Option<Self>) -> &mut dyn de::Visitor {
         Place::new(out)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{fs, path::PathBuf};
+
+    use miniserde::json;
+
+    use super::*;
+
+    #[testing::fixture("../ncmc/tests/input/*.json")]
+    fn test_deserialize(input: PathBuf) {
+        let data = fs::read(&input).unwrap();
+        let meta = String::from_utf8_lossy(&data);
+        match json::from_str::<MusicMeta>(&meta) {
+            Ok(_) => {}
+            Err(err) => {
+                eprintln!("{meta}");
+                panic!("{err}");
+            }
+        };
     }
 }
