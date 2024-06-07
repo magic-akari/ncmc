@@ -17,11 +17,9 @@ jobs:
         steps:
             - uses: actions/checkout@v4
             - run: |
-                  cargo publish -p ncm_core --token ${CRATES_TOKEN}
-                  cargo publish -p ncm_meta --token ${CRATES_TOKEN}
-                  cargo publish -p ncmc --token ${CRATES_TOKEN}
-              env:
-                  CRATES_TOKEN: ${{ secrets.CRATES_TOKEN }}
+                  cargo publish -p ncm_core
+                  cargo publish -p ncm_meta
+                  cargo publish -p ncmc
 
     publish-github-release:
         if: startsWith(github.ref, 'refs/tags/v')
