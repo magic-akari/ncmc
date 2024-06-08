@@ -2,12 +2,23 @@
 
 ## Install
 
-Option 1: Download from [GitHub Release](https://github.com/magic-akari/ncmc/releases/latest)
+### Option 1: Download from GitHub Release
 
-Option 2: Install from source
+For users who prefer a pre-built binary, you can download the latest release from [![GitHub Release](https://img.shields.io/badge/build-Release-brightgreen?style=flat&logo=github&label=GitHub)](https://github.com/magic-akari/ncmc/releases/latest)
+
+### Option 2: Install with Cargo
+
+If you have Rust installed, you can install ncmc with cargo:
 
 ```bash
 cargo install ncmc
+```
+
+Additionally, [cargo binstall](https://github.com/cargo-bins/cargo-binstall) is supported.
+It fetch the pre-built binary from GitHub Release and fallback to build from source if not available.
+
+```bash
+cargo binstall ncmc
 ```
 
 If you don’t have cargo, install it with
