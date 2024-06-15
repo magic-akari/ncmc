@@ -944,9 +944,9 @@ dependencies = [
 
 [[package]]
 name = "swc_common"
-version = "0.33.26"
+version = "0.34.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a2f9706038906e66f3919028f9f7a37f3ed552f1b85578e93f4468742e2da438"
+checksum = "f79aace01c21f25090c75f5f7c6e3901498c062e2c1178c46866ed4e62e80aba"
 dependencies = [
  "ast_node",
  "atty",
@@ -983,9 +983,9 @@ dependencies = [
 
 [[package]]
 name = "swc_error_reporters"
-version = "0.17.20"
+version = "0.18.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "72100a5f7b0c178adf7bcc5e7c8ad9d4180f499a5f5bae9faf3f417c7cbc4915"
+checksum = "9bd8f9a90efb59dc5d918b4470e5d152f34cac2f8733bfba141a96440cab3eff"
 dependencies = [
  "anyhow",
  "miette",
@@ -1071,9 +1071,9 @@ dependencies = [
 
 [[package]]
 name = "testing"
-version = "0.35.24"
+version = "0.36.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c71dd5265f4921fe51b386b1496c63ac058589d8cd38de6b61489a98c6019a16"
+checksum = "27d395aa823f3ad1ad845ed74b96188f493b469794cfbe9ef82f03196064086f"
 dependencies = [
  "ansi_term",
  "cargo_metadata",
