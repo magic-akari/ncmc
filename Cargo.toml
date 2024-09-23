@@ -16,17 +16,17 @@ resolver = "2"
     ncm_meta = { version = "0.2.10", path = "crates/ncm_meta" }
 
     aes                = "0.8.4"
-    anyhow             = "1.0.80"
-    base64             = "0.22.0"
+    anyhow             = "1.0.89"
+    base64             = "0.22.1"
     bpaf               = "0.9"
     ecb                = "0.1.2"
-    id3                = "1.13.1"
-    js-sys             = "0.3.69"
-    metaflac           = "0.2.5"
+    id3                = "1.14.0"
+    js-sys             = "0.3.70"
+    metaflac           = "0.2.7"
     miniserde          = "0.1"
     serde-wasm-bindgen = "0.6"
-    testing            = "0.36.0"
-    wasm-bindgen       = "0.2.92"
+    testing            = "0.41.0"
+    wasm-bindgen       = "0.2.93"
 
 [profile.release]
 lto   = true
