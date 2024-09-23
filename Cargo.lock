@@ -480,7 +480,7 @@ dependencies = [
 
 [[package]]
 name = "ncm_core"
-version = "0.2.10"
+version = "0.2.11"
 dependencies = [
  "aes",
  "anyhow",
@@ -490,7 +490,7 @@ dependencies = [
 
 [[package]]
 name = "ncm_meta"
-version = "0.2.10"
+version = "0.2.11"
 dependencies = [
  "anyhow",
  "id3",
@@ -502,7 +502,7 @@ dependencies = [
 
 [[package]]
 name = "ncmc"
-version = "0.2.10"
+version = "0.2.11"
 dependencies = [
  "anyhow",
  "bpaf",
@@ -513,7 +513,7 @@ dependencies = [
 
 [[package]]
 name = "ncmc_wasm"
-version = "0.2.10"
+version = "0.2.11"
 dependencies = [
  "anyhow",
  "js-sys",
