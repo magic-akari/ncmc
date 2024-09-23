@@ -9,6 +9,7 @@ env:
     CARGO_INCREMENTAL: 0
     CARGO_TERM_COLOR: "always"
     RUST_LOG: "off"
+    ARCHIVE_NAME: "ncmc"
 
 jobs:
     publish-crates:
@@ -20,6 +21,8 @@ jobs:
                   cargo publish -p ncm_core
                   cargo publish -p ncm_meta
                   cargo publish -p ncmc
+              env:
+                  CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
 
     publish-github-release:
         if: startsWith(github.ref, 'refs/tags/v')
@@ -28,6 +31,10 @@ jobs:
                 include:
                     - os: windows-latest
                       target: x86_64-pc-windows-msvc
+
+                    - os: windows-latest
+                      target: x86_64-pc-windows-msvc
+                      rust_1_76: true
 
                     - os: windows-latest
                       target: i686-pc-windows-msvc
@@ -77,6 +84,9 @@ jobs:
         steps:
             - uses: actions/checkout@v4
 
+            - if: matrix.rust_1_76
+              run: echo "RUSTUP_TOOLCHAIN=1.76.0" >> $GITHUB_ENV
+
             - name: Install Rust toolchain
               run: rustup target add ${{ matrix.target }}
 
@@ -117,35 +127,40 @@ jobs:
               # strip debug symbols from std, see https://github.com/johnthagen/min-sized-rust#remove-panic-string-formatting-with-panic_immediate_abort
               run: cargo build --release --target ${{ matrix.target }} -p ncmc
 
+            - name: Set Archive Name
+              run: |
+                  if [ "${{ matrix.rust_1_76 }}" == "true" ]; then
+                      echo "ARCHIVE_NAME=ncmc-${{ matrix.target }}-rust-1.76" >> $GITHUB_ENV
+                  else
+                      echo "ARCHIVE_NAME=ncmc-${{ matrix.target }}" >> $GITHUB_ENV
+                  fi
+
               # The binary is zipped to fix permission loss https://github.com/actions/upload-artifact#permission-loss
             - name: Archive Binary
               if: runner.os == 'Windows'
               shell: bash
               run: |
-                  BIN_NAME=ncmc-${{ matrix.target }}
                   mv target/${{ matrix.target }}/release/ncmc.exe .
-                  7z a $BIN_NAME.zip ncmc.exe
+                  7z a $ARCHIVE_NAME.zip ncmc.exe
 
               # The binary is zipped to fix permission loss https://github.com/actions/upload-artifact#permission-loss
             - name: Archive Binary
               if: runner.os != 'Windows' && matrix.target != 'wasm32-wasi'
               run: |
-                  BIN_NAME=ncmc-${{ matrix.target }}
                   mv target/${{ matrix.target }}/release/ncmc .
-                  tar czf $BIN_NAME.tgz ncmc
+                  tar czf $ARCHIVE_NAME.tgz ncmc
 
             - name: Archive Binary
               if: matrix.target == 'wasm32-wasi'
               run: |
-                  BIN_NAME=ncmc-${{ matrix.target }}
                   mv target/${{ matrix.target }}/release/ncmc.wasm .
-                  tar czf $BIN_NAME.tgz ncmc.wasm
+                  tar czf $ARCHIVE_NAME.tgz ncmc.wasm
 
             - name: Upload Binary
               uses: actions/upload-artifact@v4
               with:
                   if-no-files-found: error
-                  name: ncmc-${{ matrix.target }}
+                  name: ${{ env.ARCHIVE_NAME }}
                   path: |
                       *.zip
                       *.tgz
