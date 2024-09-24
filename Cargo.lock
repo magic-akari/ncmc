@@ -63,9 +63,9 @@ checksum = "86fdf8605db99b54d3cd748a44c6d04df638eb5dafb219b135d0149bd0db01f6"
 
 [[package]]
 name = "ast_node"
-version = "0.10.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9f8486443b68ecc17b8b45c6161b0194142f74622ed8dade227480a20291fc91"
+checksum = "f4d23a6d1d5f18bdbc06d9aa908880e5f49205156ba804751af731c51f5cf81a"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -268,9 +268,9 @@ dependencies = [
 
 [[package]]
 name = "from_variant"
-version = "0.1.9"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "32016f1242eb82af5474752d00fd8ebcd9004bd69b462b1c91de833972d08ed4"
+checksum = "e8d8947525c49c73130b5a7187b55b027b6b78fe60268d9f4c283ed690698cb1"
 dependencies = [
  "proc-macro2",
  "swc_macros_common",
@@ -869,9 +869,9 @@ dependencies = [
 
 [[package]]
 name = "swc_atoms"
-version = "0.7.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8ff4ad2795eabc349fb7ac1bdccb2625858a8be5545703ef31d5b5dc7a9f37f4"
+checksum = "0963b5f4cb08353dd4a386c7b5ee1c99d5a097722cdbc6a522efb2aeb91aad71"
 dependencies = [
  "hstr",
  "once_cell",
@@ -881,9 +881,9 @@ dependencies = [
 
 [[package]]
 name = "swc_common"
-version = "0.39.0"
+version = "0.40.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "04012755fd21334086b5ee2467a6236afea869d0aff3bdf8b20dc07ee5f676c6"
+checksum = "95fca87acdd34580b59a6f6686dfe72bcc7bad4b7abb7e6728e8e3fd4ecb1d7c"
 dependencies = [
  "ast_node",
  "better_scoped_tls",
@@ -920,9 +920,9 @@ dependencies = [
 
 [[package]]
 name = "swc_error_reporters"
-version = "0.23.0"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5a524138db566349b01ae95f215a1b93d8fd98be187bb76207ef442e8bdca739"
+checksum = "83f9286183c9be40aafcbbe8c397403fb32af812a3dffe93eee9067aee4fbedb"
 dependencies = [
  "anyhow",
  "miette",
@@ -985,9 +985,9 @@ dependencies = [
 
 [[package]]
 name = "testing"
-version = "0.41.0"
+version = "0.42.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "34b6c4420b9e5b86f69e0b7b0fcd2e9dd506b4f6edb3bb4be001fee9f78df1d6"
+checksum = "cb07036f78601d34da9ba6855e8694ee5f420b915b59c2e44283be0606ae304f"
 dependencies = [
  "ansi_term",
  "cargo_metadata",
