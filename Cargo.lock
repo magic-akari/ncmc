@@ -87,9 +87,9 @@ checksum = "72b3254f16251a8381aa12e40e3c4d2f0199f8c6508fbecb9d91f575e0fbb8c6"
 
 [[package]]
 name = "better_scoped_tls"
-version = "0.1.1"
+version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "794edcc9b3fb07bb4aecaa11f093fd45663b4feadb782d68303a2268bc2701de"
+checksum = "297b153aa5e573b5863108a6ddc9d5c968bd0b20e75cc614ee9821d2f45679c7"
 dependencies = [
  "scoped-tls",
 ]
@@ -856,9 +856,9 @@ checksum = "a8f112729512f8e442d81f95a8a7ddf2b7c6b8a1a6f509a95864142b30cab2d3"
 
 [[package]]
 name = "swc_allocator"
-version = "0.1.9"
+version = "0.1.10"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7016ee7a5186d6a80e381aa1926e0f3c7b06eaf444745ff7af3632e978eb8dc5"
+checksum = "76aa0eb65c0f39f9b6d82a7e5192c30f7ac9a78f084a21f270de1d8c600ca388"
 dependencies = [
  "bumpalo",
  "hashbrown",
@@ -881,9 +881,9 @@ dependencies = [
 
 [[package]]
 name = "swc_common"
-version = "0.40.1"
+version = "0.40.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f355465eaed1104244ce918b7ffb77ceb109aabeb74b04b98acae85683b0215b"
+checksum = "ca32839a37f3b12213b18623b1bd58d37641cab750c50c3c287876cb98b12ab4"
 dependencies = [
  "ast_node",
  "better_scoped_tls",
@@ -985,9 +985,9 @@ dependencies = [
 
 [[package]]
 name = "testing"
-version = "0.42.0"
+version = "0.42.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb07036f78601d34da9ba6855e8694ee5f420b915b59c2e44283be0606ae304f"
+checksum = "9217860da21fabe9c65981ba42f6dad2bd8f463b670448afe79aa9d50f0bc137"
 dependencies = [
  "ansi_term",
  "cargo_metadata",
