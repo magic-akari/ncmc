@@ -16,7 +16,7 @@ jobs:
         if: startsWith(github.ref, 'refs/tags/v')
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - run: |
                   cargo publish -p ncm_core
                   cargo publish -p ncm_meta
@@ -82,7 +82,7 @@ jobs:
         name: Package ${{ matrix.target }}
         runs-on: ${{ matrix.os }}
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
 
             - if: matrix.rust_1_76
               shell: bash

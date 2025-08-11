@@ -18,20 +18,20 @@ jobs:
         name: Cargo fmt
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - run: cargo fmt -- --check
 
     cargo-clippy:
         name: Cargo clippy
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - run: cargo clippy
 
     cargo-test:
         name: Cargo test
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v4
+            - uses: actions/checkout@v5
             - run: cargo check
             - run: cargo test
