@@ -159,7 +159,7 @@ jobs:
                   tar czf $ARCHIVE_NAME.tgz ncmc.wasm
 
             - name: Upload Binary
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v6
               with:
                   if-no-files-found: error
                   name: ${{ env.ARCHIVE_NAME }}
